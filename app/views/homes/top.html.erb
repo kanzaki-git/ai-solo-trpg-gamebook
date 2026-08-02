@@ -1,0 +1,174 @@
+<% content_for :title, "AIソロTRPG型ゲームブック" %>
+
+<section class="relative isolate overflow-hidden bg-[#0b0f17] text-[#e6e1d7]">
+  <%# 控えめな光と罫線による背景装飾 %>
+  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,rgba(104,91,142,0.12),transparent_35%),radial-gradient(circle_at_80%_75%,rgba(151,126,78,0.08),transparent_30%)]"></div>
+  <div class="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:linear-gradient(rgba(255,255,255,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.5)_1px,transparent_1px)] [background-size:64px_64px]"></div>
+
+  <div class="relative mx-auto grid min-h-[calc(100vh-8rem)] max-w-7xl items-center gap-16 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+    <%# サービス説明 %>
+    <div>
+      <div class="flex items-center gap-3 text-xs font-semibold tracking-[0.25em] text-[#a69ac4]">
+        <span class="h-px w-10 bg-[#6d6389]"></span>
+        AI SOLO GAMEBOOK
+      </div>
+
+      <h1 class="mt-7 max-w-xl font-serif text-4xl font-bold leading-[1.25] tracking-tight sm:text-5xl lg:text-6xl">
+        ひとりの夜に、
+        <span class="mt-2 block text-[#c7b98d]">
+          物語は待たなくていい。
+        </span>
+      </h1>
+
+      <p class="mt-7 max-w-xl text-base leading-8 text-[#aab0bb] sm:text-lg">
+        ジャンルや世界観を選ぶだけで、AIがあなただけの物語を生成します。
+        仲間やゲームマスターを集めなくても、自分の選択で変化する冒険を、
+        好きな時間に一人で楽しめます。
+      </p>
+
+      <%# 認証機能の実装後、実際のリンクへ変更する %>
+      <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+        <span class="rounded-lg bg-[#7770a3] px-7 py-4 text-center font-bold text-white shadow-lg shadow-black/20 transition hover:bg-[#8780b5]">
+          冒険を始める
+        </span>
+
+        <span class="rounded-lg border border-[#39404d] bg-[#121722] px-7 py-4 text-center font-bold text-[#d4d7dd] transition hover:border-[#596171] hover:bg-[#171d29]">
+          遊び方を見る
+        </span>
+      </div>
+
+      <%# サービスの特徴 %>
+      <dl class="mt-11 grid max-w-lg grid-cols-3 border-y border-[#252c37] py-5">
+        <div class="text-center">
+          <dt class="text-xs text-[#747c89]">プレイ時間</dt>
+          <dd class="mt-2 font-serif text-lg font-bold text-[#c7b98d]">
+            約30分
+          </dd>
+        </div>
+
+        <div class="border-x border-[#252c37] text-center">
+          <dt class="text-xs text-[#747c89]">選択肢</dt>
+          <dd class="mt-2 font-serif text-lg font-bold text-[#c7b98d]">
+            2〜4個
+          </dd>
+        </div>
+
+        <div class="text-center">
+          <dt class="text-xs text-[#747c89]">結末</dt>
+          <dd class="mt-2 font-serif text-lg font-bold text-[#c7b98d]">
+            3種類
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <%# ゲームのプレイ画面イメージ %>
+    <div class="relative mx-auto w-full max-w-2xl" aria-label="ゲームブックのプレイ画面イメージ">
+      <%# 背後に重なる物語のページ %>
+      <div class="absolute -right-3 top-8 h-[88%] w-full rounded-2xl border border-[#252b37] bg-[#10151e]"></div>
+      <div class="absolute -right-1 top-4 h-[94%] w-full rounded-2xl border border-[#2b3240] bg-[#121822]"></div>
+
+      <article class="relative overflow-hidden rounded-2xl border border-[#343c4a] bg-[#151b25] shadow-2xl shadow-black/50">
+        <%# シーン情報 %>
+        <header class="flex flex-wrap items-center justify-between gap-4 border-b border-[#29313e] px-6 py-5 sm:px-8">
+          <div>
+            <p class="text-xs font-semibold tracking-[0.2em] text-[#9388b4]">
+              SCENE 06
+            </p>
+
+            <h2 class="mt-1 font-serif text-xl font-bold text-[#e6e1d7]">
+              忘れられた観測室
+            </h2>
+          </div>
+
+          <div class="text-right">
+            <p class="text-xs text-[#747c89]">
+              物語の進行
+            </p>
+            <p class="mt-1 text-sm font-semibold text-[#b6ac8e]">
+              6 / 10
+            </p>
+          </div>
+        </header>
+
+        <div class="px-6 py-7 sm:px-8 sm:py-9">
+          <%# 現在の状態 %>
+          <div class="flex flex-wrap gap-2">
+            <span class="rounded-full border border-[#4b465d] bg-[#211f2c] px-3 py-1.5 text-xs text-[#b9afd0]">
+              所持品：真鍮の鍵
+            </span>
+
+            <span class="rounded-full border border-[#4d493c] bg-[#242219] px-3 py-1.5 text-xs text-[#c4b78f]">
+              手がかり：消された記録
+            </span>
+          </div>
+
+          <%# 物語本文 %>
+          <div class="mt-7 border-l border-[#6f6689] pl-5 sm:pl-6">
+            <p class="font-serif text-base leading-8 text-[#c8cbd1]">
+              円形の観測室には、長いあいだ誰も入っていないはずだった。
+              しかし、机の上に置かれた記録帳のインクは、まだ乾いていない。
+            </p>
+
+            <p class="mt-4 font-serif text-base leading-8 text-[#c8cbd1]">
+              天井から響く小さな歯車の音に合わせて、壁の星図がゆっくりと動き始める。
+              真鍮の鍵が、手の中でかすかに震えた。
+            </p>
+          </div>
+
+          <%# 過去の選択による変化 %>
+          <aside class="mt-7 rounded-lg border border-[#343442] bg-[#111620] px-4 py-3">
+            <p class="text-xs font-semibold tracking-wider text-[#8e86a5]">
+              あなたが覚えていること
+            </p>
+
+            <p class="mt-2 text-sm leading-6 text-[#9fa5af]">
+              管理人は「観測室の時計には触れるな」と警告していた。
+            </p>
+          </aside>
+
+          <%# 選択肢 %>
+          <div class="mt-8">
+            <p class="font-serif text-sm font-bold text-[#d7d1c4]">
+              次の行動を選んでください
+            </p>
+
+            <div class="mt-4 space-y-3">
+              <div class="group rounded-lg border border-[#504a64] bg-[#211f2c] px-5 py-4 transition hover:border-[#756d91] hover:bg-[#292638]">
+                <div class="flex items-start gap-4">
+                  <span class="font-serif text-[#9c91bc]">01</span>
+                  <p class="text-sm font-semibold leading-6 text-[#d8d4df]">
+                    真鍮の鍵を星図の中央へ差し込む
+                  </p>
+                </div>
+              </div>
+
+              <div class="group rounded-lg border border-[#333b48] bg-[#181e28] px-5 py-4 transition hover:border-[#555f70] hover:bg-[#1d2430]">
+                <div class="flex items-start gap-4">
+                  <span class="font-serif text-[#777f8e]">02</span>
+                  <p class="text-sm font-semibold leading-6 text-[#c7cbd2]">
+                    インクの乾いていない記録帳を調べる
+                  </p>
+                </div>
+              </div>
+
+              <div class="group rounded-lg border border-[#333b48] bg-[#181e28] px-5 py-4 transition hover:border-[#555f70] hover:bg-[#1d2430]">
+                <div class="flex items-start gap-4">
+                  <span class="font-serif text-[#777f8e]">03</span>
+                  <p class="text-sm font-semibold leading-6 text-[#c7cbd2]">
+                    管理人の警告に従い、観測室から離れる
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="flex items-center justify-between border-t border-[#29313e] px-6 py-4 text-xs text-[#68717e] sm:px-8">
+          <span>選択した行動は自動で保存されます</span>
+          <span>第2章</span>
+        </footer>
+      </article>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,30 @@
+<header class="border-b border-[#252c37] bg-[#0b0f17] text-[#e6e1d7]">
+  <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-4 sm:flex-row sm:px-6 lg:px-8">
+    <%# サービス名・トップページへのリンク %>
+    <%= link_to root_path,
+                class: "group flex items-center gap-3",
+                aria: { label: "トップページへ戻る" } do %>
+      <span
+        class="flex h-9 w-9 items-center justify-center rounded-lg border border-[#4b465d] bg-[#171b27] font-serif text-lg text-[#a69ac4]"
+        aria-hidden="true"
+      >
+        ◇
+      </span>
+
+      <span class="font-serif text-lg font-bold tracking-wide text-[#e6e1d7] transition group-hover:text-[#c7b98d] sm:text-xl">
+        AIソロTRPG型ゲームブック
+      </span>
+    <% end %>
+
+    <%# Sorcery導入後、実際の認証リンクへ変更する %>
+    <nav class="flex items-center gap-3" aria-label="認証メニュー">
+      <span class="rounded-lg border border-[#414957] bg-[#121722] px-4 py-2 text-sm font-semibold text-[#c7cbd2]">
+        ユーザー登録
+      </span>
+
+      <span class="rounded-lg bg-[#7770a3] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-black/20">
+        ログイン
+      </span>
+    </nav>
+  </div>
+</header>
