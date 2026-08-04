@@ -10,9 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_03_195816) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_04_140754) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "gamebooks", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "title"
+    t.text "summary"
+    t.string "genre"
+    t.text "world_setting"
+    t.string "tone"
+    t.string "difficulty"
+    t.integer "play_time"
+    t.integer "generation_status", default: 0, null: false
+    t.string "openai_response_id"
+    t.text "generation_error_message"
+    t.datetime "generated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_gamebooks_on_user_id"
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
@@ -23,4 +41,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_03_195816) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
+
+  add_foreign_key "gamebooks", "users"
 end

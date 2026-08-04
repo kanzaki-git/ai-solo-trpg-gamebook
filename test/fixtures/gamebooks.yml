@@ -1,0 +1,29 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  title: MyString
+  summary: MyText
+  genre: MyString
+  world_setting: MyText
+  tone: MyString
+  difficulty: MyString
+  play_time: 1
+  generation_status: 1
+  openai_response_id: MyString
+  generation_error_message: MyText
+  generated_at: 2026-08-04 14:07:54
+
+two:
+  user: two
+  title: MyString
+  summary: MyText
+  genre: MyString
+  world_setting: MyText
+  tone: MyString
+  difficulty: MyString
+  play_time: 1
+  generation_status: 1
+  openai_response_id: MyString
+  generation_error_message: MyText
+  generated_at: 2026-08-04 14:07:54
