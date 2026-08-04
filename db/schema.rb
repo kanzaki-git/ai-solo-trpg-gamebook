@@ -10,9 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_04_140754) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_04_200359) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "choices", force: :cascade do |t|
+    t.bigint "scene_id", null: false
+    t.bigint "next_scene_id", null: false
+    t.string "text", null: false
+    t.text "result_text", null: false
+    t.integer "position", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["next_scene_id"], name: "index_choices_on_next_scene_id"
+    t.index ["scene_id"], name: "index_choices_on_scene_id"
+  end
 
   create_table "gamebooks", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -32,6 +44,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_04_140754) do
     t.index ["user_id"], name: "index_gamebooks_on_user_id"
   end
 
+  create_table "scenes", force: :cascade do |t|
+    t.bigint "gamebook_id", null: false
+    t.string "scene_key", null: false
+    t.string "title", null: false
+    t.text "body", null: false
+    t.text "situation", null: false
+    t.integer "scene_type", null: false
+    t.boolean "is_start", default: false, null: false
+    t.boolean "is_ending", default: false, null: false
+    t.integer "ending_type"
+    t.integer "position", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["gamebook_id"], name: "index_scenes_on_gamebook_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
     t.string "email", null: false
@@ -42,5 +70,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_04_140754) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "choices", "scenes"
+  add_foreign_key "choices", "scenes", column: "next_scene_id"
   add_foreign_key "gamebooks", "users"
+  add_foreign_key "scenes", "gamebooks"
 end

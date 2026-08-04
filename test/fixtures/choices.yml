@@ -1,0 +1,16 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  scene: one
+  next_scene_id: <%= ActiveRecord::FixtureSet.identify(:two) %>
+  text: MyString
+  result_text: MyText
+  position: 1
+
+two:
+  scene: two
+  next_scene_id: <%= ActiveRecord::FixtureSet.identify(:one) %>
+  text: MyString
+  result_text: MyText
+  position: 1
+  
