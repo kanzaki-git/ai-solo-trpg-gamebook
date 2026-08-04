@@ -1,0 +1,55 @@
+<div class="mx-auto max-w-md px-4 py-16">
+  <div class="rounded-2xl bg-white p-8 text-gray-900 shadow-xl">
+    <h1 class="mb-2 text-center text-3xl font-bold">
+      ログイン
+    </h1>
+
+    <p class="mb-8 text-center text-sm text-gray-600">
+      登録したアカウントで物語を続けます
+    </p>
+
+    <%= form_with url: login_path, class: "space-y-5" do |form| %>
+      <% if flash.now[:alert] %>
+        <div class="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+          <%= flash.now[:alert] %>
+        </div>
+      <% end %>
+
+      <div>
+        <%= form.label :email, "メールアドレス",
+                       class: "mb-2 block text-sm font-semibold" %>
+
+        <%= form.email_field :email,
+                             required: true,
+                             autocomplete: "email",
+                             class: "w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200" %>
+      </div>
+
+      <div>
+        <%= form.label :password, "パスワード",
+                       class: "mb-2 block text-sm font-semibold" %>
+
+        <%= form.password_field :password,
+                                required: true,
+                                autocomplete: "current-password",
+                                class: "w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200" %>
+      </div>
+
+      <%= form.submit "ログインする",
+                      class: "w-full cursor-pointer rounded-lg bg-purple-600 px-4 py-3 font-bold text-white transition hover:bg-purple-700" %>
+    <% end %>
+
+    <div class="mt-6 space-y-3 text-center">
+      <p class="text-sm text-gray-600">
+        アカウントをお持ちでない方は
+        <%= link_to "ユーザー登録",
+                    new_user_path,
+                    class: "text-purple-600 hover:underline" %>
+      </p>
+
+      <%= link_to "トップページへ戻る",
+                  root_path,
+                  class: "text-sm text-purple-600 hover:underline" %>
+    </div>
+  </div>
+</div>

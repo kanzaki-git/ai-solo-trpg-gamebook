@@ -16,15 +16,26 @@
       </span>
     <% end %>
 
-    <%# Sorcery導入後、実際の認証リンクへ変更する %>
+    <%# ログイン・ログアウト・ユーザー登録へのリンク %>
     <nav class="flex items-center gap-3" aria-label="認証メニュー">
-      <%= link_to "ユーザー登録",
-            new_user_path,
-            class: "rounded-lg border border-[#414957] bg-[#121722] px-4 py-2 text-sm font-semibold text-[#c7cbd2] transition hover:border-[#7770a3] hover:bg-[#1a2030] hover:text-white" %>
+      <% if logged_in? %>
+        <span class="text-sm text-[#c7cbd2]">
+          <%= current_user.name %>さん
+        </span>
 
-      <span class="rounded-lg bg-[#7770a3] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-black/20">
-        ログイン
-      </span>
+        <%= link_to "ログアウト",
+                    logout_path,
+                    data: { turbo_method: :delete },
+                    class: "rounded-lg border border-[#414957] bg-[#121722] px-4 py-2 text-sm font-semibold text-[#c7cbd2] transition hover:border-[#7770a3] hover:bg-[#1a2030] hover:text-white" %>
+      <% else %>
+        <%= link_to "ユーザー登録",
+                    new_user_path,
+                    class: "rounded-lg border border-[#414957] bg-[#121722] px-4 py-2 text-sm font-semibold text-[#c7cbd2] transition hover:border-[#7770a3] hover:bg-[#1a2030] hover:text-white" %>
+
+        <%= link_to "ログイン",
+                    login_path,
+                    class: "rounded-lg bg-[#7770a3] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-black/20 transition hover:bg-[#8981b5]" %>
+      <% end %>
     </nav>
   </div>
 </header>
