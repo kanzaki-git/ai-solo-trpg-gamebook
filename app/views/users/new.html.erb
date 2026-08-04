@@ -1,0 +1,76 @@
+<div class="mx-auto max-w-md px-4 py-16">
+  <div class="rounded-2xl bg-white p-8 text-gray-900 shadow-xl">
+    <h1 class="mb-2 text-center text-3xl font-bold">
+      ユーザー登録
+    </h1>
+
+    <p class="mb-8 text-center text-sm text-gray-600">
+      物語を始めるためのアカウントを作成します
+    </p>
+
+    <%= form_with model: @user, class: "space-y-5" do |form| %>
+      <% if @user.errors.any? %>
+        <div class="rounded-lg border border-red-300 bg-red-50 p-4 text-red-700">
+          <p class="font-bold">
+            入力内容を確認してください
+          </p>
+
+          <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+            <% @user.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= form.label :name, "名前",
+                       class: "mb-2 block text-sm font-semibold" %>
+
+        <%= form.text_field :name,
+                            required: true,
+                            autocomplete: "name",
+                            class: "w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200" %>
+      </div>
+
+      <div>
+        <%= form.label :email, "メールアドレス",
+                       class: "mb-2 block text-sm font-semibold" %>
+
+        <%= form.email_field :email,
+                             required: true,
+                             autocomplete: "email",
+                             class: "w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200" %>
+      </div>
+
+      <div>
+        <%= form.label :password, "パスワード",
+                       class: "mb-2 block text-sm font-semibold" %>
+
+        <%= form.password_field :password,
+                                required: true,
+                                autocomplete: "new-password",
+                                class: "w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200" %>
+      </div>
+
+      <div>
+        <%= form.label :password_confirmation, "パスワード確認",
+                       class: "mb-2 block text-sm font-semibold" %>
+
+        <%= form.password_field :password_confirmation,
+                                required: true,
+                                autocomplete: "new-password",
+                                class: "w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200" %>
+      </div>
+
+      <%= form.submit "アカウントを作成する",
+                      class: "w-full cursor-pointer rounded-lg bg-purple-600 px-4 py-3 font-bold text-white transition hover:bg-purple-700" %>
+    <% end %>
+
+    <div class="mt-6 text-center">
+      <%= link_to "トップページへ戻る",
+                  root_path,
+                  class: "text-sm text-purple-600 hover:underline" %>
+    </div>
+  </div>
+</div>

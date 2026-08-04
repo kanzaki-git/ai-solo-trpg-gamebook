@@ -6,6 +6,7 @@ class UserTest < ActiveSupport::TestCase
       name: "Test User",
       email: "test@example.com",
       password: "password123",
+      password_confirmation: "password123",
     )
   end
 
@@ -17,21 +18,21 @@ class UserTest < ActiveSupport::TestCase
     @user.name = nil
 
     assert_not @user.valid?
-    assert_includes @user.errors[:name], "can't be blank"
+    assert @user.errors.of_kind?(:name, :blank)
   end
 
   test "メールアドレスが空欄の場合は無効になる" do
     @user.email = nil
 
     assert_not @user.valid?
-    assert_includes @user.errors[:email], "can't be blank"
+    assert @user.errors.of_kind?(:email, :blank)
   end
 
   test "同じメールアドレスは登録できない" do
     @user.email = users(:one).email
 
     assert_not @user.valid?
-    assert_includes @user.errors[:email], "has already been taken"
+    assert @user.errors.of_kind?(:email, :taken)
   end
 
   test "パスワードが暗号化されて保存される" do
