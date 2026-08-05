@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_04_200359) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_05_055514) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "choice_flag_rules", force: :cascade do |t|
+    t.bigint "choice_id", null: false
+    t.bigint "flag_id", null: false
+    t.integer "rule_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["choice_id"], name: "index_choice_flag_rules_on_choice_id"
+    t.index ["flag_id"], name: "index_choice_flag_rules_on_flag_id"
+  end
 
   create_table "choices", force: :cascade do |t|
     t.bigint "scene_id", null: false
@@ -24,6 +34,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_04_200359) do
     t.datetime "updated_at", null: false
     t.index ["next_scene_id"], name: "index_choices_on_next_scene_id"
     t.index ["scene_id"], name: "index_choices_on_scene_id"
+  end
+
+  create_table "flags", force: :cascade do |t|
+    t.bigint "gamebook_id", null: false
+    t.string "key", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["gamebook_id"], name: "index_flags_on_gamebook_id"
   end
 
   create_table "gamebooks", force: :cascade do |t|
@@ -70,8 +90,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_04_200359) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "choice_flag_rules", "choices"
+  add_foreign_key "choice_flag_rules", "flags"
   add_foreign_key "choices", "scenes"
   add_foreign_key "choices", "scenes", column: "next_scene_id"
+  add_foreign_key "flags", "gamebooks"
   add_foreign_key "gamebooks", "users"
   add_foreign_key "scenes", "gamebooks"
 end
