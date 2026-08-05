@@ -2,6 +2,7 @@ class User < ApplicationRecord
   authenticates_with_sorcery!
 
   has_many :gamebooks, dependent: :destroy
+  has_many :play_sessions, dependent: :destroy
 
   attr_accessor :password_confirmation
 
