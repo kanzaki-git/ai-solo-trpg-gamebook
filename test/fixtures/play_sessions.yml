@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  gamebook: one
+  current_scene: one
+  status: 0
+  started_at: 2026-08-05 18:18:12
+
+two:
+  user: two
+  gamebook: two
+  current_scene: two
+  ending_scene: two
+  status: 1
+  started_at: 2026-08-05 18:18:12
+  completed_at: 2026-08-05 18:18:12

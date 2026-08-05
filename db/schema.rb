@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_05_064452) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_05_181812) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -84,6 +84,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_05_064452) do
     t.index ["gamebook_id"], name: "index_items_on_gamebook_id"
   end
 
+  create_table "play_sessions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "gamebook_id", null: false
+    t.bigint "current_scene_id", null: false
+    t.bigint "ending_scene_id"
+    t.integer "status", default: 0, null: false
+    t.datetime "started_at", null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["current_scene_id"], name: "index_play_sessions_on_current_scene_id"
+    t.index ["ending_scene_id"], name: "index_play_sessions_on_ending_scene_id"
+    t.index ["gamebook_id"], name: "index_play_sessions_on_gamebook_id"
+    t.index ["user_id"], name: "index_play_sessions_on_user_id"
+  end
+
   create_table "scenes", force: :cascade do |t|
     t.bigint "gamebook_id", null: false
     t.string "scene_key", null: false
@@ -119,5 +135,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_05_064452) do
   add_foreign_key "flags", "gamebooks"
   add_foreign_key "gamebooks", "users"
   add_foreign_key "items", "gamebooks"
+  add_foreign_key "play_sessions", "gamebooks"
+  add_foreign_key "play_sessions", "scenes", column: "current_scene_id"
+  add_foreign_key "play_sessions", "scenes", column: "ending_scene_id"
+  add_foreign_key "play_sessions", "users"
   add_foreign_key "scenes", "gamebooks"
 end
