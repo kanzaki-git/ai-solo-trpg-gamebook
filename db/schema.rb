@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_05_055514) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_05_064452) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -22,6 +22,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_05_055514) do
     t.datetime "updated_at", null: false
     t.index ["choice_id"], name: "index_choice_flag_rules_on_choice_id"
     t.index ["flag_id"], name: "index_choice_flag_rules_on_flag_id"
+  end
+
+  create_table "choice_item_rules", force: :cascade do |t|
+    t.bigint "choice_id", null: false
+    t.bigint "item_id", null: false
+    t.integer "rule_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["choice_id"], name: "index_choice_item_rules_on_choice_id"
+    t.index ["item_id"], name: "index_choice_item_rules_on_item_id"
   end
 
   create_table "choices", force: :cascade do |t|
@@ -64,6 +74,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_05_055514) do
     t.index ["user_id"], name: "index_gamebooks_on_user_id"
   end
 
+  create_table "items", force: :cascade do |t|
+    t.bigint "gamebook_id", null: false
+    t.string "key", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["gamebook_id"], name: "index_items_on_gamebook_id"
+  end
+
   create_table "scenes", force: :cascade do |t|
     t.bigint "gamebook_id", null: false
     t.string "scene_key", null: false
@@ -92,9 +112,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_05_055514) do
 
   add_foreign_key "choice_flag_rules", "choices"
   add_foreign_key "choice_flag_rules", "flags"
+  add_foreign_key "choice_item_rules", "choices"
+  add_foreign_key "choice_item_rules", "items"
   add_foreign_key "choices", "scenes"
   add_foreign_key "choices", "scenes", column: "next_scene_id"
   add_foreign_key "flags", "gamebooks"
   add_foreign_key "gamebooks", "users"
+  add_foreign_key "items", "gamebooks"
   add_foreign_key "scenes", "gamebooks"
 end
