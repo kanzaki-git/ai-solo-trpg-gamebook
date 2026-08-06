@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  play_session: one
+  flag: one
+
+two:
+  play_session: two
+  flag: two
