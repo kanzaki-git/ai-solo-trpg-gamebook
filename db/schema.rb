@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_05_181812) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_06_214949) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -84,6 +84,36 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_05_181812) do
     t.index ["gamebook_id"], name: "index_items_on_gamebook_id"
   end
 
+  create_table "play_histories", force: :cascade do |t|
+    t.bigint "play_session_id", null: false
+    t.bigint "scene_id", null: false
+    t.bigint "choice_id"
+    t.datetime "visited_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["choice_id"], name: "index_play_histories_on_choice_id"
+    t.index ["play_session_id"], name: "index_play_histories_on_play_session_id"
+    t.index ["scene_id"], name: "index_play_histories_on_scene_id"
+  end
+
+  create_table "play_session_flags", force: :cascade do |t|
+    t.bigint "play_session_id", null: false
+    t.bigint "flag_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["flag_id"], name: "index_play_session_flags_on_flag_id"
+    t.index ["play_session_id"], name: "index_play_session_flags_on_play_session_id"
+  end
+
+  create_table "play_session_items", force: :cascade do |t|
+    t.bigint "play_session_id", null: false
+    t.bigint "item_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["item_id"], name: "index_play_session_items_on_item_id"
+    t.index ["play_session_id"], name: "index_play_session_items_on_play_session_id"
+  end
+
   create_table "play_sessions", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "gamebook_id", null: false
@@ -135,6 +165,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_05_181812) do
   add_foreign_key "flags", "gamebooks"
   add_foreign_key "gamebooks", "users"
   add_foreign_key "items", "gamebooks"
+  add_foreign_key "play_histories", "choices"
+  add_foreign_key "play_histories", "play_sessions"
+  add_foreign_key "play_histories", "scenes"
+  add_foreign_key "play_session_flags", "flags"
+  add_foreign_key "play_session_flags", "play_sessions"
+  add_foreign_key "play_session_items", "items"
+  add_foreign_key "play_session_items", "play_sessions"
   add_foreign_key "play_sessions", "gamebooks"
   add_foreign_key "play_sessions", "scenes", column: "current_scene_id"
   add_foreign_key "play_sessions", "scenes", column: "ending_scene_id"
