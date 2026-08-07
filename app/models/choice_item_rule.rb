@@ -7,4 +7,8 @@ class ChoiceItemRule < ApplicationRecord
     add: 1,
     remove: 2
   }
+
+  validates :rule_type, presence: true
+  validates :item_id,
+            uniqueness: { scope: [ :choice_id, :rule_type ] }
 end
