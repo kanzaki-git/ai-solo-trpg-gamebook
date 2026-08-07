@@ -1,6 +1,21 @@
 class Scene < ApplicationRecord
   belongs_to :gamebook
 
+  enum :scene_type, {
+    introduction: 0,
+    exploration: 1,
+    change: 2,
+    summary: 3,
+    climax: 4,
+    ending: 5
+  }
+
+  enum :ending_type, {
+    bad: 0,
+    normal: 1,
+    true: 2
+  }
+
   has_many :choices,
            dependent: :destroy
 
