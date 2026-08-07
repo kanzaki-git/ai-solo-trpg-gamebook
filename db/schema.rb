@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_06_214949) do
+ActiveRecord::Schema[8.0].define(version: 2026_08_07_000611) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -20,6 +20,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_06_214949) do
     t.integer "rule_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["choice_id", "flag_id", "rule_type"], name: "index_choice_flag_rules_on_choice_id_and_flag_id_and_rule_type", unique: true
     t.index ["choice_id"], name: "index_choice_flag_rules_on_choice_id"
     t.index ["flag_id"], name: "index_choice_flag_rules_on_flag_id"
   end
@@ -30,6 +31,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_06_214949) do
     t.integer "rule_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["choice_id", "item_id", "rule_type"], name: "index_choice_item_rules_on_choice_id_and_item_id_and_rule_type", unique: true
     t.index ["choice_id"], name: "index_choice_item_rules_on_choice_id"
     t.index ["item_id"], name: "index_choice_item_rules_on_item_id"
   end
@@ -102,6 +104,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_06_214949) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["flag_id"], name: "index_play_session_flags_on_flag_id"
+    t.index ["play_session_id", "flag_id"], name: "index_play_session_flags_on_play_session_id_and_flag_id", unique: true
     t.index ["play_session_id"], name: "index_play_session_flags_on_play_session_id"
   end
 
@@ -111,6 +114,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_06_214949) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["item_id"], name: "index_play_session_items_on_item_id"
+    t.index ["play_session_id", "item_id"], name: "index_play_session_items_on_play_session_id_and_item_id", unique: true
     t.index ["play_session_id"], name: "index_play_session_items_on_play_session_id"
   end
 
