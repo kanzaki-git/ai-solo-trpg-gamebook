@@ -16,3 +16,7 @@ ja:
       taken: "はすでに使用されています"
       too_short: "は%{count}文字以上で入力してください"
       confirmation: "がパスワードと一致しません"
+
+  time:
+    formats:
+      short: "%Y年%m月%d日 %H:%M"
