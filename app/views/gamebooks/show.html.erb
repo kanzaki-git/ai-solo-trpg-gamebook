@@ -72,12 +72,10 @@
 
       <%# プレイ開始・再開ボタン %>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-        <button
-          type="button"
-          class="inline-flex w-full items-center justify-center rounded-xl bg-[#c4b78f] px-5 py-3 text-sm font-bold text-[#17191e] transition hover:bg-[#d2c69e] sm:w-auto"
-        >
-          最初から遊ぶ
-        </button>
+        <%= button_to "最初から遊ぶ",
+                      gamebook_play_sessions_path(@gamebook),
+                      method: :post,
+                      class: "inline-flex w-full items-center justify-center rounded-xl bg-[#c4b78f] px-5 py-3 text-sm font-bold text-[#17191e] transition hover:bg-[#d2c69e] sm:w-auto" %>
 
         <% if @playing_session %>
           <button
@@ -90,7 +88,7 @@
       </div>
 
       <p class="mt-4 text-xs leading-6 text-[#747c89]">
-        プレイの開始・再開機能は今後実装されます。
+        「最初から遊ぶ」を選択すると、新しいプレイを開始します。
       </p>
     </div>
   </article>

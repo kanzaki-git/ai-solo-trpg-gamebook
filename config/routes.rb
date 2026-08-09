@@ -2,7 +2,11 @@ Rails.application.routes.draw do
   root "homes#top"
 
   resources :users, only: %i[new create]
-  resources :gamebooks, only: %i[index show]
+  resources :gamebooks, only: %i[index show] do
+    resources :play_sessions, only: :create
+  end
+
+  resources :play_sessions, only: :show
 
   get "login", to: "user_sessions#new"
   post "login", to: "user_sessions#create"
