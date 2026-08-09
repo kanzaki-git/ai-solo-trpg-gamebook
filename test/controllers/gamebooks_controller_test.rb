@@ -25,6 +25,20 @@ class GamebooksControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "ログイン中は自分のゲームブック詳細画面を表示できる" do
+    gamebook = create_gamebook(
+      user: @user,
+      title: "詳細画面用ゲームブック"
+    )
+
+    login_as(@user)
+    get gamebook_path(gamebook)
+
+    assert_response :success
+    assert_includes response.body, "詳細画面用ゲームブック"
+    assert_includes response.body, "テスト用ゲームブックの概要"
+  end
+
   test "ログインユーザーのゲームブックだけが表示される" do
     create_gamebook(
       user: @user,
@@ -41,6 +55,19 @@ class GamebooksControllerTest < ActionDispatch::IntegrationTest
 
     assert_includes response.body, "自分のゲームブック"
     assert_not_includes response.body, "他のユーザーのゲームブック"
+  end
+
+  test "他のユーザーのゲームブック詳細画面は表示できない" do
+    other_gamebook = create_gamebook(
+      user: @other_user,
+      title: "他のユーザーのゲームブック"
+    )
+
+    login_as(@user)
+    get gamebook_path(other_gamebook)
+
+    assert_redirected_to gamebooks_path
+    assert_equal "ゲームブックが見つかりませんでした", flash[:alert]
   end
 
   test "ゲームブックが新しい順に表示される" do
@@ -88,6 +115,17 @@ class GamebooksControllerTest < ActionDispatch::IntegrationTest
 
   test "未ログイン時はログイン画面へリダイレクトされる" do
     get gamebooks_path
+
+    assert_redirected_to login_path
+  end
+
+  test "未ログイン時はゲームブック詳細画面を表示できない" do
+    gamebook = create_gamebook(
+      user: @user,
+      title: "未ログイン確認用ゲームブック"
+    )
+
+    get gamebook_path(gamebook)
 
     assert_redirected_to login_path
   end

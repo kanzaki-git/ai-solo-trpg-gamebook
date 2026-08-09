@@ -85,6 +85,13 @@
                 </dd>
               </div>
             </dl>
+
+            <%# ゲームブック詳細画面へのリンク %>
+            <div class="mt-6">
+              <%= link_to "詳細を見る",
+                          gamebook_path(gamebook),
+                          class: "inline-flex w-full items-center justify-center rounded-xl border border-[#4a5363] bg-[#202735] px-5 py-3 text-sm font-bold text-[#e6e1d7] transition hover:border-[#606b7d] hover:bg-[#293241]" %>
+            </div>
           </div>
         </article>
       <% end %>
