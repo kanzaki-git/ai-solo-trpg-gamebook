@@ -26,6 +26,27 @@ class PlaySessionsController < ApplicationController
     end
   end
 
+  def advance
+    @play_session = current_user.play_sessions.find(params[:id])
+    current_scene = @play_session.current_scene
+    choice = current_scene.choices.find(params[:choice_id])
+
+    PlaySession.transaction do
+      @play_session.play_histories.create!(
+        scene: current_scene,
+        choice: choice,
+        visited_at: Time.current
+      )
+
+      @play_session.update!(
+        current_scene: choice.next_scene
+      )
+    end
+
+    redirect_to play_session_path(@play_session),
+                notice: choice.result_text
+  end
+
   def show
     @play_session = current_user.play_sessions.find(params[:id])
     @current_scene = @play_session.current_scene
