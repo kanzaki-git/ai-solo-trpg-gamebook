@@ -6,7 +6,9 @@ Rails.application.routes.draw do
     resources :play_sessions, only: :create
   end
 
-  resources :play_sessions, only: :show
+  resources :play_sessions, only: :show do
+    patch :advance, on: :member
+  end
 
   get "login", to: "user_sessions#new"
   post "login", to: "user_sessions#create"
