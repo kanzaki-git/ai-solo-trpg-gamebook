@@ -1,0 +1,135 @@
+require "test_helper"
+
+class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @user = User.create!(
+      name: "Play Session Test User",
+      email: "play-session-test@example.com",
+      password: "password123",
+      password_confirmation: "password123"
+    )
+
+    @other_user = User.create!(
+      name: "Other Play Session User",
+      email: "other-play-session@example.com",
+      password: "password123",
+      password_confirmation: "password123"
+    )
+  end
+
+  test "未ログイン時はプレイを開始できない" do
+    gamebook = create_gamebook(user: @user)
+    create_start_scene(gamebook: gamebook)
+
+    assert_no_difference "PlaySession.count" do
+      post gamebook_play_sessions_path(gamebook)
+    end
+
+    assert_redirected_to login_path
+  end
+
+  test "ログイン中は最初からプレイを開始できる" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    login_as(@user)
+
+    assert_difference "PlaySession.count", 1 do
+      post gamebook_play_sessions_path(gamebook)
+    end
+
+    play_session = PlaySession.last
+
+    assert_equal @user, play_session.user
+    assert_equal gamebook, play_session.gamebook
+    assert_equal start_scene, play_session.current_scene
+    assert_predicate play_session, :playing?
+    assert_not_nil play_session.started_at
+    assert_redirected_to play_session_path(play_session)
+  end
+
+  test "ログイン中は自分のプレイ画面を表示できる" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    login_as(@user)
+    get play_session_path(play_session)
+
+    assert_response :success
+    assert_includes response.body, "物語の始まり"
+    assert_includes response.body, "あなたは深い森の入口に立っている。"
+end
+
+test "他のユーザーのプレイ画面は表示できない" do
+  gamebook = create_gamebook(user: @other_user)
+  start_scene = create_start_scene(gamebook: gamebook)
+
+  play_session = @other_user.play_sessions.create!(
+    gamebook: gamebook,
+    current_scene: start_scene,
+    status: :playing,
+    started_at: Time.current
+  )
+
+  login_as(@user)
+  get play_session_path(play_session)
+
+  assert_response :not_found
+end
+
+test "開始シーンがない場合はプレイを開始できない" do
+  gamebook = create_gamebook(user: @user)
+
+  login_as(@user)
+
+  assert_no_difference "PlaySession.count" do
+    post gamebook_play_sessions_path(gamebook)
+  end
+
+  assert_redirected_to gamebook_path(gamebook)
+  assert_equal(
+    "開始シーンが見つからないため、プレイを開始できません。",
+    flash[:alert]
+  )
+end
+
+  private
+
+  def login_as(user)
+    post login_path, params: {
+      email: user.email,
+      password: "password123"
+    }
+  end
+
+  def create_gamebook(user:)
+    user.gamebooks.create!(
+      title: "プレイテスト用ゲームブック",
+      summary: "プレイテスト用の概要",
+      genre: "ファンタジー",
+      world_setting: "魔法が存在する世界",
+      tone: "シリアス",
+      difficulty: "普通",
+      play_time: 30,
+      generation_status: :completed
+    )
+  end
+
+  def create_start_scene(gamebook:)
+    gamebook.scenes.create!(
+      scene_key: "start",
+      title: "物語の始まり",
+      body: "あなたは深い森の入口に立っている。",
+      situation: "冒険の開始地点",
+      scene_type: :introduction,
+      is_start: true,
+      position: 1
+    )
+  end
+end
