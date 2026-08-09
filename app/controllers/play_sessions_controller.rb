@@ -28,5 +28,8 @@ class PlaySessionsController < ApplicationController
 
   def show
     @play_session = current_user.play_sessions.find(params[:id])
+    @current_scene = @play_session.current_scene
+    @choices = @current_scene.choices.order(:position)
+    @items = @play_session.items
   end
 end

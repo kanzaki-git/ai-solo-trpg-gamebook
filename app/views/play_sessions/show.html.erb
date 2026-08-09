@@ -1,15 +1,71 @@
-<main class="container mx-auto max-w-4xl px-4 py-8">
-  <section class="rounded-lg bg-base-200 p-6 shadow">
-    <p class="mb-2 text-sm text-base-content/70">
+<div class="mx-auto max-w-4xl px-4 py-10">
+  <div class="mb-6">
+    <p class="text-sm text-base-content/60">
       <%= @play_session.gamebook.title %>
     </p>
 
-    <h1 class="mb-4 text-3xl font-bold">
-      <%= @play_session.current_scene.title %>
+    <h1 class="mt-2 text-3xl font-bold">
+      <%= @current_scene.title %>
     </h1>
+  </div>
 
-    <p class="whitespace-pre-wrap leading-relaxed">
-      <%= @play_session.current_scene.body %>
-    </p>
-  </section>
-</main>
+  <div class="space-y-6">
+    <section class="rounded-2xl bg-base-200 p-6 shadow">
+      <p class="whitespace-pre-wrap leading-relaxed">
+        <%= @current_scene.body %>
+      </p>
+    </section>
+
+    <section class="rounded-2xl border border-base-300 p-6">
+      <h2 class="mb-3 text-xl font-bold">
+        現在の状況
+      </h2>
+
+      <p class="whitespace-pre-wrap leading-relaxed">
+        <%= @current_scene.situation %>
+      </p>
+    </section>
+
+    <section>
+      <h2 class="mb-4 text-xl font-bold">
+        どうしますか？
+      </h2>
+
+      <div class="space-y-3">
+        <% @choices.each do |choice| %>
+          <div class="rounded-xl border border-base-300 bg-base-100 p-4 shadow-sm">
+            <p class="font-medium">
+              <%= choice.text %>
+            </p>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <section class="rounded-2xl bg-base-200 p-6">
+      <h2 class="mb-3 text-xl font-bold">
+        現在の所持品
+      </h2>
+
+      <% if @items.any? %>
+        <ul class="list-disc space-y-2 pl-5">
+          <% @items.each do |item| %>
+            <li>
+              <%= item.name %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-base-content/60">
+          所持品はありません
+        </p>
+      <% end %>
+    </section>
+  </div>
+
+  <div class="mt-8">
+    <%= link_to "ゲームブック詳細に戻る",
+                gamebook_path(@play_session.gamebook),
+                class: "btn btn-ghost" %>
+  </div>
+</div>

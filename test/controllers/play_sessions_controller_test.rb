@@ -51,11 +51,38 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
   test "ログイン中は自分のプレイ画面を表示できる" do
     gamebook = create_gamebook(user: @user)
     start_scene = create_start_scene(gamebook: gamebook)
+    next_scene = gamebook.scenes.create!(
+      scene_key: "forest_path",
+      title: "森の奥",
+      body: "あなたは森の奥へ進んだ。",
+      situation: "木々に囲まれている",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    start_scene.choices.create!(
+      next_scene: next_scene,
+      text: "森の奥へ進む",
+      result_text: "あなたは慎重に森の奥へ進んだ。",
+      position: 1
+    )
+
     play_session = @user.play_sessions.create!(
       gamebook: gamebook,
       current_scene: start_scene,
       status: :playing,
       started_at: Time.current
+    )
+
+    item = gamebook.items.create!(
+      key: "old_lantern",
+      name: "古びたランタン",
+      description: "暗い場所を照らせるランタン"
+    )
+
+    play_session.play_session_items.create!(
+      item: item
     )
 
     login_as(@user)
@@ -64,6 +91,25 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "物語の始まり"
     assert_includes response.body, "あなたは深い森の入口に立っている。"
+    assert_includes response.body, "冒険の開始地点"
+    assert_includes response.body, "森の奥へ進む"
+    assert_includes response.body, "古びたランタン"
+  end
+
+test "未ログイン時はプレイ画面を表示できない" do
+  gamebook = create_gamebook(user: @user)
+  start_scene = create_start_scene(gamebook: gamebook)
+
+  play_session = @user.play_sessions.create!(
+    gamebook: gamebook,
+    current_scene: start_scene,
+    status: :playing,
+    started_at: Time.current
+  )
+
+  get play_session_path(play_session)
+
+  assert_redirected_to login_path
 end
 
 test "他のユーザーのプレイ画面は表示できない" do
