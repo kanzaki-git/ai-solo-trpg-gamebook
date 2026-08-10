@@ -14,7 +14,13 @@ class Choice < ApplicationRecord
 
   def available_for?(play_session)
     required_flag_ids = choice_flag_rules.required.pluck(:flag_id)
+    required_item_ids = choice_item_rules.required.pluck(:item_id)
 
-    (required_flag_ids - play_session.flag_ids).empty?
+    has_required_flags =
+      (required_flag_ids - play_session.flag_ids).empty?
+    has_required_items =
+      (required_item_ids - play_session.item_ids).empty?
+
+    has_required_flags && has_required_items
   end
 end

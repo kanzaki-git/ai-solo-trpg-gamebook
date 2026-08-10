@@ -417,6 +417,167 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal choice.result_text, flash[:notice]
   end
 
+  test "選択肢を選ぶと所持品を追加する" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    next_scene = gamebook.scenes.create!(
+      scene_key: "found_lantern",
+      title: "ランタンを発見",
+      body: "あなたは古びたランタンを見つけた。",
+      situation: "ランタンを手に入れた",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    lantern = gamebook.items.create!(
+      key: "old_lantern",
+      name: "古びたランタン",
+      description: "暗い場所を照らせるランタン"
+    )
+
+    choice = start_scene.choices.create!(
+      next_scene: next_scene,
+      text: "ランタンを拾う",
+      result_text: "古びたランタンを拾った。",
+      position: 1
+    )
+
+    choice.choice_item_rules.create!(
+      item: lantern,
+      rule_type: :add
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    login_as(@user)
+
+    assert_difference "PlaySessionItem.count", 1 do
+      patch advance_play_session_path(play_session),
+            params: { choice_id: choice.id }
+    end
+
+    play_session.reload
+
+    assert_includes play_session.items, lantern
+    assert_equal next_scene, play_session.current_scene
+  end
+
+  test "選択肢を選ぶと所持品を削除する" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    next_scene = gamebook.scenes.create!(
+      scene_key: "opened_door",
+      title: "開かれた扉",
+      body: "鍵を使うと、扉がゆっくりと開いた。",
+      situation: "扉の先へ進める",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    key_item = gamebook.items.create!(
+      key: "rusty_key",
+      name: "錆びた鍵",
+      description: "古い扉を開けるための鍵"
+    )
+
+    choice = start_scene.choices.create!(
+      next_scene: next_scene,
+      text: "錆びた鍵を使って扉を開ける",
+      result_text: "錆びた鍵を使って扉を開けた。",
+      position: 1
+    )
+
+    choice.choice_item_rules.create!(
+      item: key_item,
+      rule_type: :remove
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    play_session.play_session_items.create!(
+      item: key_item
+    )
+
+    login_as(@user)
+
+    assert_difference "PlaySessionItem.count", -1 do
+      patch advance_play_session_path(play_session),
+            params: { choice_id: choice.id }
+    end
+
+    play_session.reload
+
+    assert_not_includes play_session.items, key_item
+    assert_equal next_scene, play_session.current_scene
+  end
+
+  test "必須所持品を持っていない選択肢は実行できない" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    next_scene = gamebook.scenes.create!(
+      scene_key: "locked_room",
+      title: "鍵のかかった部屋",
+      body: "扉には頑丈な鍵がかかっている。",
+      situation: "鍵がなければ先へ進めない",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    key_item = gamebook.items.create!(
+      key: "silver_key",
+      name: "銀の鍵",
+      description: "鍵のかかった扉を開けるための鍵"
+    )
+
+    choice = start_scene.choices.create!(
+      next_scene: next_scene,
+      text: "銀の鍵で扉を開ける",
+      result_text: "銀の鍵を使って扉を開けた。",
+      position: 1
+    )
+
+    choice.choice_item_rules.create!(
+      item: key_item,
+      rule_type: :required
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    login_as(@user)
+
+    assert_no_difference "PlayHistory.count" do
+      patch advance_play_session_path(play_session),
+            params: { choice_id: choice.id }
+    end
+
+    play_session.reload
+
+    assert_redirected_to play_session_path(play_session)
+    assert_equal start_scene, play_session.current_scene
+    assert_not_includes play_session.items, key_item
+  end
+
   test "他のユーザーのプレイは進められない" do
     gamebook = create_gamebook(user: @other_user)
     start_scene = create_start_scene(gamebook: gamebook)
