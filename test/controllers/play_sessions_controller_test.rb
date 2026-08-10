@@ -96,6 +96,74 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "古びたランタン"
   end
 
+  test "必須フラグを所持している選択肢だけを表示する" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    next_scene = gamebook.scenes.create!(
+      scene_key: "hidden_room",
+      title: "隠し部屋",
+      body: "隠し部屋へ入った。",
+      situation: "薄暗い部屋にいる",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    owned_flag = gamebook.flags.create!(
+      key: "found_key",
+      name: "鍵を発見した",
+      description: "隠し部屋の鍵を持っている"
+    )
+
+    missing_flag = gamebook.flags.create!(
+      key: "learned_password",
+      name: "合言葉を知った",
+      description: "秘密の合言葉を知っている"
+    )
+
+    available_choice = start_scene.choices.create!(
+      next_scene: next_scene,
+      text: "鍵を使って扉を開ける",
+      result_text: "鍵を使って扉を開けた。",
+      position: 1
+    )
+
+    unavailable_choice = start_scene.choices.create!(
+      next_scene: next_scene,
+      text: "合言葉を唱える",
+      result_text: "合言葉を唱えた。",
+      position: 2
+    )
+
+    available_choice.choice_flag_rules.create!(
+      flag: owned_flag,
+      rule_type: :required
+    )
+
+    unavailable_choice.choice_flag_rules.create!(
+      flag: missing_flag,
+      rule_type: :required
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    play_session.play_session_flags.create!(
+      flag: owned_flag
+    )
+
+    login_as(@user)
+    get play_session_path(play_session)
+
+    assert_response :success
+    assert_includes response.body, "鍵を使って扉を開ける"
+    assert_not_includes response.body, "合言葉を唱える"
+  end
   test "未ログイン時はプレイ画面を表示できない" do
     gamebook = create_gamebook(user: @user)
     start_scene = create_start_scene(gamebook: gamebook)
@@ -110,6 +178,163 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     get play_session_path(play_session)
 
     assert_redirected_to login_path
+  end
+
+  test "必須フラグを所持していない選択肢では進めない" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    next_scene = gamebook.scenes.create!(
+      scene_key: "hidden_room",
+      title: "隠し部屋",
+      body: "隠し部屋へ入った。",
+      situation: "薄暗い部屋にいる",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    required_flag = gamebook.flags.create!(
+      key: "found_key",
+      name: "鍵を発見した",
+      description: "隠し部屋の鍵を持っている"
+    )
+
+    choice = start_scene.choices.create!(
+      next_scene: next_scene,
+      text: "鍵を使って扉を開ける",
+      result_text: "鍵を使って扉を開けた。",
+      position: 1
+    )
+
+    choice.choice_flag_rules.create!(
+      flag: required_flag,
+      rule_type: :required
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    login_as(@user)
+
+    assert_no_difference "PlayHistory.count" do
+      patch advance_play_session_path(play_session),
+            params: { choice_id: choice.id }
+    end
+
+    assert_equal start_scene, play_session.reload.current_scene
+    assert_redirected_to play_session_path(play_session)
+    assert_equal "この選択肢は現在選べません。", flash[:alert]
+  end
+
+  test "選択肢を選ぶとフラグを追加する" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    next_scene = gamebook.scenes.create!(
+      scene_key: "after_investigation",
+      title: "調査を終えて",
+      body: "あなたは手がかりを見つけた。",
+      situation: "新しい事実が判明した",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    found_clue_flag = gamebook.flags.create!(
+      key: "found_clue",
+      name: "手がかりを発見した",
+      description: "事件につながる手がかりを見つけた"
+    )
+
+    choice = start_scene.choices.create!(
+      next_scene: next_scene,
+      text: "周囲を詳しく調べる",
+      result_text: "周囲を調べ、手がかりを発見した。",
+      position: 1
+    )
+
+    choice.choice_flag_rules.create!(
+      flag: found_clue_flag,
+      rule_type: :add
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    login_as(@user)
+
+    assert_difference "PlaySessionFlag.count", 1 do
+      patch advance_play_session_path(play_session),
+            params: { choice_id: choice.id }
+    end
+
+    assert_includes play_session.reload.flags, found_clue_flag
+    assert_equal next_scene, play_session.current_scene
+  end
+
+  test "選択肢を選ぶとフラグを削除する" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    next_scene = gamebook.scenes.create!(
+      scene_key: "after_unlocking",
+      title: "扉の向こう",
+      body: "あなたは扉の向こうへ進んだ。",
+      situation: "鍵を使い終えた",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    used_key_flag = gamebook.flags.create!(
+      key: "has_key",
+      name: "鍵を所持している",
+      description: "扉を開けるための鍵を持っている"
+    )
+
+    choice = start_scene.choices.create!(
+      next_scene: next_scene,
+      text: "鍵を使って扉を開ける",
+      result_text: "鍵を使って扉を開けた。",
+      position: 1
+    )
+
+    choice.choice_flag_rules.create!(
+      flag: used_key_flag,
+      rule_type: :remove
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    play_session.play_session_flags.create!(
+      flag: used_key_flag
+    )
+
+    login_as(@user)
+
+    assert_difference "PlaySessionFlag.count", -1 do
+      patch advance_play_session_path(play_session),
+            params: { choice_id: choice.id }
+    end
+
+    play_session.reload
+
+    assert_not_includes play_session.flags, used_key_flag
+    assert_equal next_scene, play_session.current_scene
   end
 
   test "他のユーザーのプレイ画面は表示できない" do
