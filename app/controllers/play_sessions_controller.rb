@@ -31,12 +31,30 @@ class PlaySessionsController < ApplicationController
     current_scene = @play_session.current_scene
     choice = current_scene.choices.find(params[:choice_id])
 
-    PlaySession.transaction do
+    unless choice.available_for?(@play_session)
+      redirect_to play_session_path(@play_session),
+                  alert: "この選択肢は現在選べません。"
+      return
+    end
+
+    ActiveRecord::Base.transaction do
       @play_session.play_histories.create!(
         scene: current_scene,
         choice: choice,
         visited_at: Time.current
       )
+
+      choice.choice_flag_rules.add.find_each do |rule|
+        @play_session.play_session_flags.find_or_create_by!(
+          flag: rule.flag
+        )
+      end
+
+      choice.choice_flag_rules.remove.find_each do |rule|
+        @play_session.play_session_flags.find_by(
+          flag: rule.flag
+        )&.destroy!
+      end
 
       @play_session.update!(
         current_scene: choice.next_scene
@@ -50,7 +68,7 @@ class PlaySessionsController < ApplicationController
   def show
     @play_session = current_user.play_sessions.find(params[:id])
     @current_scene = @play_session.current_scene
-    @choices = @current_scene.choices.order(:position)
+    @choices = @current_scene.choices.order(:position).select { |choice| choice.available_for?(@play_session) }
     @items = @play_session.items
   end
 end
