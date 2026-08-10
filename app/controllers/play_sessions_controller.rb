@@ -56,6 +56,18 @@ class PlaySessionsController < ApplicationController
         )&.destroy!
       end
 
+      choice.choice_item_rules.add.find_each do |rule|
+        @play_session.play_session_items.find_or_create_by!(
+          item: rule.item
+        )
+      end
+
+      choice.choice_item_rules.remove.find_each do |rule|
+        @play_session.play_session_items.find_by(
+          item: rule.item
+        )&.destroy!
+      end
+
       @play_session.update!(
         current_scene: choice.next_scene
       )
