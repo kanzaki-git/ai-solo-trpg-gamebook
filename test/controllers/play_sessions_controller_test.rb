@@ -164,6 +164,7 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "鍵を使って扉を開ける"
     assert_not_includes response.body, "合言葉を唱える"
   end
+
   test "未ログイン時はプレイ画面を表示できない" do
     gamebook = create_gamebook(user: @user)
     start_scene = create_start_scene(gamebook: gamebook)
@@ -576,6 +577,108 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to play_session_path(play_session)
     assert_equal start_scene, play_session.current_scene
     assert_not_includes play_session.items, key_item
+  end
+
+  test "保存された現在のシーンからプレイを再開できる" do
+    gamebook = create_gamebook(
+      user: @user,
+    )
+
+    saved_scene = gamebook.scenes.create!(
+      scene_key: "saved_scene",
+      title: "保存されたシーン",
+      body: "前回保存された場面から再開する。",
+      situation: "冒険の途中",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: saved_scene,
+      status: :playing,
+      started_at: 1.hour.ago
+    )
+
+    login_as(@user)
+
+    assert_no_difference "PlaySession.count" do
+      get play_session_path(play_session)
+    end
+
+    assert_response :success
+    assert_select "body", text: /保存されたシーン/
+    assert_select "body", text: /前回保存された場面から再開する。/
+  end
+
+  test "再開しても保存済みのフラグと所持品と履歴が維持される" do
+    gamebook = create_gamebook(user: @user)
+
+    saved_scene = gamebook.scenes.create!(
+      scene_key: "saved_state_scene",
+      title: "状態保存確認シーン",
+      body: "保存状態を確認する。",
+      situation: "冒険の途中",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: saved_scene,
+      status: :playing,
+      started_at: 1.hour.ago
+    )
+
+    saved_flag = gamebook.flags.create!(
+      key: "found_clue",
+      name: "手がかりを発見",
+      description: "重要な手がかりを発見している"
+    )
+
+    saved_item = gamebook.items.create!(
+      key: "old_key",
+      name: "古びた鍵",
+      description: "古い扉を開けるための鍵"
+    )
+
+    play_session.play_session_flags.create!(flag: saved_flag)
+    play_session.play_session_items.create!(item: saved_item)
+
+    saved_history = play_session.play_histories.create!(
+      scene: saved_scene,
+      visited_at: 30.minutes.ago
+    )
+
+    login_as(@user)
+
+    assert_no_difference(
+      [
+        "PlaySession.count",
+        "PlaySessionFlag.count",
+        "PlaySessionItem.count",
+        "PlayHistory.count"
+      ]
+    ) do
+      get play_session_path(play_session)
+    end
+
+    assert_response :success
+    assert_select "body", text: /古びた鍵/
+
+    assert PlaySessionFlag.exists?(
+      play_session: play_session,
+      flag: saved_flag
+    )
+
+    assert PlaySessionItem.exists?(
+      play_session: play_session,
+      item: saved_item
+    )
+
+    assert PlayHistory.exists?(id: saved_history.id)
   end
 
   test "他のユーザーのプレイは進められない" do

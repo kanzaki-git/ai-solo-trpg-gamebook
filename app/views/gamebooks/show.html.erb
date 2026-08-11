@@ -78,12 +78,10 @@
                       class: "inline-flex w-full items-center justify-center rounded-xl bg-[#c4b78f] px-5 py-3 text-sm font-bold text-[#17191e] transition hover:bg-[#d2c69e] sm:w-auto" %>
 
         <% if @playing_session %>
-          <button
-            type="button"
-            class="inline-flex w-full items-center justify-center rounded-xl border border-[#4a5363] bg-[#202735] px-5 py-3 text-sm font-bold text-[#e6e1d7] transition hover:bg-[#293241] sm:w-auto"
-          >
+          <%= link_to play_session_path(@playing_session),
+                      class: "inline-flex w-full items-center justify-center rounded-xl border border-[#4a5363] bg-[#202735] px-5 py-3 text-sm font-bold text-[#e6e1d7] transition hover:bg-[#293241] sm:w-auto" do %>
             続きから遊ぶ
-          </button>
+          <% end %>
         <% end %>
       </div>
 
