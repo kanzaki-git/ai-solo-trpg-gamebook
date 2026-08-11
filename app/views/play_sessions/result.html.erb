@@ -39,9 +39,14 @@
     </section>
   </div>
 
-  <div class="mt-8 text-center">
+  <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+    <%= button_to "最初から遊び直す",
+                  gamebook_play_sessions_path(@play_session.gamebook),
+                  method: :post,
+                  class: "btn btn-primary" %>
+
     <%= link_to "ゲームブック一覧へ戻る",
                 gamebooks_path,
-                class: "btn btn-primary" %>
+                class: "btn btn-outline" %>
   </div>
 </div>
