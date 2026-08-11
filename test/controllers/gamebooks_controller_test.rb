@@ -130,6 +130,87 @@ class GamebooksControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
   end
 
+  test "プレイ途中のデータがある場合は続きから遊ぶリンクを表示する" do
+    gamebook = create_gamebook(
+      user: @user,
+      title: "再開用ゲームブック"
+    )
+
+    current_scene = gamebook.scenes.create!(
+      scene_key: "resume_scene",
+      title: "再開するシーン",
+      body: "前回の続きから物語が始まる。",
+      situation: "冒険の途中",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: current_scene,
+      status: :playing,
+      started_at: 1.hour.ago
+    )
+
+    login_as(@user)
+    get gamebook_path(gamebook)
+
+    assert_response :success
+    assert_select(
+      "a[href='#{play_session_path(play_session)}']",
+      text: "続きから遊ぶ"
+    )
+  end
+
+  test "複数のプレイ途中データがある場合は最後に更新されたデータを再開対象にする" do
+    gamebook = create_gamebook(
+      user: @user,
+      title: "最新プレイデータ確認用ゲームブック"
+    )
+
+    current_scene = gamebook.scenes.create!(
+      scene_key: "resume_scene",
+      title: "再開確認シーン",
+      body: "再開するシーンの本文",
+      situation: "冒険の途中",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    older_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: current_scene,
+      status: :playing,
+      started_at: 3.hours.ago,
+      updated_at: 2.hours.ago
+    )
+
+    latest_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: current_scene,
+      status: :playing,
+      started_at: 2.hours.ago,
+      updated_at: 1.hour.ago
+    )
+
+    login_as(@user)
+    get gamebook_path(gamebook)
+
+    assert_response :success
+
+    assert_select(
+      "a[href='#{play_session_path(latest_session)}']",
+      text: "続きから遊ぶ"
+    )
+
+    assert_select(
+      "a[href='#{play_session_path(older_session)}']",
+      count: 0
+    )
+  end
+
   private
 
   def login_as(user)
