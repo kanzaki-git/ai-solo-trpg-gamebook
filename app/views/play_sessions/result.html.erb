@@ -1,0 +1,47 @@
+<div class="mx-auto max-w-4xl px-4 py-10">
+  <div class="mb-8 text-center">
+    <p class="text-sm text-base-content/60">
+      <%= @play_session.gamebook.title %>
+    </p>
+
+    <p class="mt-4 text-sm font-bold tracking-widest text-violet-400">
+      物語の結末
+    </p>
+
+    <h1 class="mt-3 text-3xl font-bold">
+      <%= @ending_scene.title %>
+    </h1>
+  </div>
+
+  <div class="space-y-6">
+    <section class="rounded-2xl border border-violet-500/40 bg-base-200 p-6 shadow">
+      <div class="mb-5 text-center">
+        <% ending_type_name =
+             case @ending_scene.ending_type
+             when "bad"
+               "バッドエンディング"
+             when "normal"
+               "ノーマルエンディング"
+             when "true"
+               "トゥルーエンディング"
+             else
+               "エンディング"
+             end %>
+
+        <span class="inline-block rounded-full bg-violet-600 px-4 py-2 text-sm font-bold text-white">
+          <%= ending_type_name %>
+        </span>
+      </div>
+
+      <p class="whitespace-pre-wrap leading-relaxed">
+        <%= @ending_scene.body %>
+      </p>
+    </section>
+  </div>
+
+  <div class="mt-8 text-center">
+    <%= link_to "ゲームブック一覧へ戻る",
+                gamebooks_path,
+                class: "btn btn-primary" %>
+  </div>
+</div>

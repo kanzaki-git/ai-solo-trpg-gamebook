@@ -37,6 +37,8 @@ class PlaySessionsController < ApplicationController
       return
     end
 
+    next_scene = choice.next_scene
+
     ActiveRecord::Base.transaction do
       @play_session.play_histories.create!(
         scene: current_scene,
@@ -68,13 +70,27 @@ class PlaySessionsController < ApplicationController
         )&.destroy!
       end
 
-      @play_session.update!(
-        current_scene: choice.next_scene
-      )
+      if next_scene.is_ending?
+        @play_session.update!(
+          current_scene: next_scene,
+          ending_scene: next_scene,
+          status: :completed,
+          completed_at: Time.current
+        )
+      else
+        @play_session.update!(
+          current_scene: next_scene
+        )
+      end
     end
 
-    redirect_to play_session_path(@play_session),
-                notice: choice.result_text
+    if next_scene.is_ending?
+      redirect_to result_play_session_path(@play_session),
+                  notice: choice.result_text
+    else
+      redirect_to play_session_path(@play_session),
+                  notice: choice.result_text
+    end
   end
 
   def show
@@ -82,5 +98,17 @@ class PlaySessionsController < ApplicationController
     @current_scene = @play_session.current_scene
     @choices = @current_scene.choices.order(:position).select { |choice| choice.available_for?(@play_session) }
     @items = @play_session.items
+  end
+
+  def result
+    @play_session = current_user.play_sessions.find(params[:id])
+
+    unless @play_session.completed? && @play_session.ending_scene.present?
+      redirect_to play_session_path(@play_session),
+                  alert: "このプレイはまだ完了していません。"
+      return
+    end
+
+    @ending_scene = @play_session.ending_scene
   end
 end

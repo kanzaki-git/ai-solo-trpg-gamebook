@@ -8,6 +8,7 @@ Rails.application.routes.draw do
 
   resources :play_sessions, only: :show do
     patch :advance, on: :member
+    get :result, on: :member
   end
 
   get "login", to: "user_sessions#new"

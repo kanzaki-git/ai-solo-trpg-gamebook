@@ -720,6 +720,167 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal start_scene, play_session.reload.current_scene
   end
 
+  test "エンディングに到達するとプレイが完了する" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    ending_scene = gamebook.scenes.create!(
+      scene_key: "true_ending",
+      title: "真実の結末",
+      body: "あなたは事件の真相へたどり着いた。",
+      situation: "物語が完結した",
+      scene_type: :ending,
+      is_start: false,
+      is_ending: true,
+      ending_type: :true,
+      position: 2
+    )
+
+    choice = start_scene.choices.create!(
+      next_scene: ending_scene,
+      text: "事件の真相を明らかにする",
+      result_text: "すべての謎が解き明かされた。",
+      position: 1
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    login_as(@user)
+
+    patch advance_play_session_path(play_session),
+          params: { choice_id: choice.id }
+
+    play_session.reload
+
+    assert_equal ending_scene, play_session.current_scene
+    assert_equal ending_scene, play_session.ending_scene
+    assert_predicate play_session, :completed?
+    assert_not_nil play_session.completed_at
+    assert_redirected_to result_play_session_path(play_session)
+    assert_equal choice.result_text, flash[:notice]
+  end
+
+  test "完了したプレイの結果画面を表示できる" do
+    gamebook = create_gamebook(user: @user)
+
+    ending_scene = gamebook.scenes.create!(
+      scene_key: "true_ending",
+      title: "真実の結末",
+      body: "あなたは事件の真相へたどり着いた。",
+      situation: "物語が完結した",
+      scene_type: :ending,
+      is_start: false,
+      is_ending: true,
+      ending_type: :true,
+      position: 1
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: ending_scene,
+      ending_scene: ending_scene,
+      status: :completed,
+      started_at: 30.minutes.ago,
+      completed_at: Time.current
+    )
+
+    login_as(@user)
+
+    get result_play_session_path(play_session)
+
+    assert_response :success
+    assert_includes response.body, gamebook.title
+    assert_includes response.body, "物語の結末"
+    assert_includes response.body, "真実の結末"
+    assert_includes response.body, "トゥルーエンディング"
+    assert_includes response.body, "あなたは事件の真相へたどり着いた。"
+    assert_includes response.body, "ゲームブック一覧へ戻る"
+  end
+
+  test "未完了のプレイでは結果画面を表示できない" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    login_as(@user)
+
+    get result_play_session_path(play_session)
+
+    assert_redirected_to play_session_path(play_session)
+    assert_equal "このプレイはまだ完了していません。", flash[:alert]
+  end
+
+  test "未ログイン時は結果画面を表示できない" do
+    gamebook = create_gamebook(user: @user)
+
+    ending_scene = gamebook.scenes.create!(
+      scene_key: "true_ending",
+      title: "真実の結末",
+      body: "あなたは事件の真相へたどり着いた。",
+      situation: "物語が完結した",
+      scene_type: :ending,
+      is_start: false,
+      is_ending: true,
+      ending_type: :true,
+      position: 1
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: ending_scene,
+      ending_scene: ending_scene,
+      status: :completed,
+      started_at: 30.minutes.ago,
+      completed_at: Time.current
+    )
+
+    get result_play_session_path(play_session)
+
+    assert_redirected_to login_path
+  end
+
+  test "他のユーザーの結果画面を表示できない" do
+    gamebook = create_gamebook(user: @user)
+
+    ending_scene = gamebook.scenes.create!(
+      scene_key: "true_ending",
+      title: "真実の結末",
+      body: "あなたは事件の真相へたどり着いた。",
+      situation: "物語が完結した",
+      scene_type: :ending,
+      is_start: false,
+      is_ending: true,
+      ending_type: :true,
+      position: 1
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: ending_scene,
+      ending_scene: ending_scene,
+      status: :completed,
+      started_at: 30.minutes.ago,
+      completed_at: Time.current
+    )
+
+    login_as(@other_user)
+
+    get result_play_session_path(play_session)
+
+    assert_response :not_found
+  end
+
   private
 
   def login_as(user)
