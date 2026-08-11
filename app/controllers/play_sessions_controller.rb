@@ -2,7 +2,7 @@ class PlaySessionsController < ApplicationController
   before_action :require_login
 
   def create
-    gamebook = Gamebook.find(params[:gamebook_id])
+    gamebook = current_user.gamebooks.find(params[:gamebook_id])
     start_scene = gamebook.scenes.find_by(is_start: true)
 
     unless start_scene

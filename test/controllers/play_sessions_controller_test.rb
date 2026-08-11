@@ -371,6 +371,19 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     )
   end
 
+test "他のユーザーのゲームブックではプレイを開始できない" do
+    gamebook = create_gamebook(user: @other_user)
+    create_start_scene(gamebook: gamebook)
+
+    login_as(@user)
+
+    assert_no_difference "PlaySession.count" do
+      post gamebook_play_sessions_path(gamebook)
+    end
+
+    assert_response :not_found
+  end
+
   test "選択肢を選ぶと履歴を保存して次のシーンへ進む" do
     gamebook = create_gamebook(user: @user)
     start_scene = create_start_scene(gamebook: gamebook)
@@ -800,6 +813,95 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "トゥルーエンディング"
     assert_includes response.body, "あなたは事件の真相へたどり着いた。"
     assert_includes response.body, "ゲームブック一覧へ戻る"
+    assert_includes response.body, "最初から遊び直す"
+  end
+
+  test "完了したゲームブックを最初から遊び直せる" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    ending_scene = gamebook.scenes.create!(
+      scene_key: "true_ending",
+      title: "真実の結末",
+      body: "あなたは事件の真相へたどり着いた。",
+      situation: "物語が完結した",
+      scene_type: :ending,
+      is_start: false,
+      is_ending: true,
+      ending_type: :true,
+      position: 2
+    )
+
+    completed_play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: ending_scene,
+      ending_scene: ending_scene,
+      status: :completed,
+      started_at: 30.minutes.ago,
+      completed_at: Time.current
+    )
+
+    acquired_flag = gamebook.flags.create!(
+      key: "found_truth",
+      name: "真相を発見した",
+      description: "事件の真相を明らかにした"
+    )
+
+    acquired_item = gamebook.items.create!(
+      key: "mysterious_key",
+      name: "謎の鍵",
+      description: "事件の途中で手に入れた鍵"
+    )
+
+    completed_play_session.play_session_flags.create!(
+      flag: acquired_flag
+    )
+
+    completed_play_session.play_session_items.create!(
+      item: acquired_item
+    )
+
+    play_history = completed_play_session.play_histories.create!(
+      scene: ending_scene,
+      visited_at: Time.current
+    )
+
+    login_as(@user)
+
+    assert_difference "PlaySession.count", 1 do
+      assert_no_difference(
+        [
+          "PlaySessionFlag.count",
+          "PlaySessionItem.count",
+          "PlayHistory.count"
+        ]
+      ) do
+        post gamebook_play_sessions_path(gamebook)
+      end
+    end
+
+    new_play_session = PlaySession.order(:id).last
+
+    assert_not_equal completed_play_session, new_play_session
+    assert_equal @user, new_play_session.user
+    assert_equal gamebook, new_play_session.gamebook
+    assert_equal start_scene, new_play_session.current_scene
+    assert_predicate new_play_session, :playing?
+    assert_nil new_play_session.ending_scene
+    assert_nil new_play_session.completed_at
+    assert_empty new_play_session.flags
+    assert_empty new_play_session.items
+    assert_empty new_play_session.play_histories
+    assert_redirected_to play_session_path(new_play_session)
+
+    completed_play_session.reload
+
+    assert_predicate completed_play_session, :completed?
+    assert_equal ending_scene, completed_play_session.current_scene
+    assert_equal ending_scene, completed_play_session.ending_scene
+    assert_includes completed_play_session.flags, acquired_flag
+    assert_includes completed_play_session.items, acquired_item
+    assert PlayHistory.exists?(id: play_history.id)
   end
 
   test "未完了のプレイでは結果画面を表示できない" do
