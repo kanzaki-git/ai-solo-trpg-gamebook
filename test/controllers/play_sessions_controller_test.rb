@@ -96,6 +96,92 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "古びたランタン"
   end
 
+  test "現在のシーンに属していない選択肢では進められない" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    other_scene = gamebook.scenes.create!(
+      scene_key: "other_scene",
+      title: "別のシーン",
+      body: "現在地とは異なるシーン。",
+      situation: "別の場所にいる",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    next_scene = gamebook.scenes.create!(
+      scene_key: "next_scene",
+      title: "次のシーン",
+      body: "本来はここへ進む。",
+      situation: "物語の続き",
+      scene_type: :exploration,
+      is_start: false,
+      position: 3
+    )
+
+    other_scene_choice = other_scene.choices.create!(
+      next_scene: next_scene,
+      text: "別のシーンにある選択肢",
+      result_text: "次のシーンへ進んだ。",
+      position: 1
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    login_as(@user)
+
+    assert_no_difference "PlayHistory.count" do
+      patch advance_play_session_path(play_session),
+            params: { choice_id: other_scene_choice.id }
+    end
+
+    assert_response :not_found
+    assert_equal start_scene, play_session.reload.current_scene
+  end
+
+  test "未ログイン状態ではプレイを進められない" do
+    gamebook = create_gamebook(user: @user)
+    start_scene = create_start_scene(gamebook: gamebook)
+
+    next_scene = gamebook.scenes.create!(
+      scene_key: "next_scene",
+      title: "次のシーン",
+      body: "次のシーンの本文。",
+      situation: "物語が進んだ",
+      scene_type: :exploration,
+      is_start: false,
+      position: 2
+    )
+
+    choice = start_scene.choices.create!(
+      next_scene: next_scene,
+      text: "先へ進む",
+      result_text: "次のシーンへ進んだ。",
+      position: 1
+    )
+
+    play_session = @user.play_sessions.create!(
+      gamebook: gamebook,
+      current_scene: start_scene,
+      status: :playing,
+      started_at: Time.current
+    )
+
+    assert_no_difference "PlayHistory.count" do
+      patch advance_play_session_path(play_session),
+            params: { choice_id: choice.id }
+    end
+
+    assert_redirected_to login_path
+    assert_equal start_scene, play_session.reload.current_scene
+  end
+
   test "必須フラグを所持している選択肢だけを表示する" do
     gamebook = create_gamebook(user: @user)
     start_scene = create_start_scene(gamebook: gamebook)
