@@ -91,7 +91,6 @@ class PlaySessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "物語の始まり"
     assert_includes response.body, "あなたは深い森の入口に立っている。"
-    assert_includes response.body, "冒険の開始地点"
     assert_includes response.body, "森の奥へ進む"
     assert_includes response.body, "古びたランタン"
   end

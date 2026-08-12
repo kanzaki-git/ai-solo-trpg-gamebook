@@ -1,73 +1,87 @@
-<div class="mx-auto max-w-4xl px-4 py-10">
-  <div class="mb-6">
-    <p class="text-sm text-base-content/60">
-      <%= @play_session.gamebook.title %>
-    </p>
+<div class="relative isolate overflow-hidden">
+  <div class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(109,40,217,0.15),transparent_40%)]"></div>
 
-    <h1 class="mt-2 text-3xl font-bold">
-      <%= @current_scene.title %>
-    </h1>
-  </div>
-
-  <div class="space-y-6">
-    <section class="rounded-2xl bg-base-200 p-6 shadow">
-      <p class="whitespace-pre-wrap leading-relaxed">
-        <%= @current_scene.body %>
+  <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+    <header class="mb-8 border-b border-white/10 pb-6">
+      <p class="text-xs font-medium tracking-[0.25em] text-violet-300/70 uppercase">
+        Story
       </p>
-    </section>
 
-    <section class="rounded-2xl border border-base-300 p-6">
-      <h2 class="mb-3 text-xl font-bold">
-        現在の状況
-      </h2>
-
-      <p class="whitespace-pre-wrap leading-relaxed">
-        <%= @current_scene.situation %>
+      <p class="mt-3 text-sm text-slate-400">
+        <%= @play_session.gamebook.title %>
       </p>
-    </section>
 
-    <section>
-      <h2 class="mb-4 text-xl font-bold">
-        どうしますか？
-      </h2>
+      <h1 class="mt-2 text-2xl font-bold tracking-wide text-[#f3eee4] sm:text-4xl">
+        <%= @current_scene.title %>
+      </h1>
+    </header>
 
-      <div class="space-y-3">
-        <% @choices.each do |choice| %>
-          <%= button_to advance_play_session_path(@play_session),
-                        method: :patch,
-                        params: { choice_id: choice.id },
-                        form_class: "w-full",
-                        class: "w-full cursor-pointer rounded-xl border border-slate-500 bg-slate-800 px-5 py-4 text-left font-medium text-white shadow-sm transition-colors hover:border-violet-400 hover:bg-slate-700" do %>
-            <%= choice.text %>
-          <% end %>
-        <% end %>
-      </div>
-    </section>
-
-    <section class="rounded-2xl bg-base-200 p-6">
-      <h2 class="mb-3 text-xl font-bold">
-        現在の所持品
-      </h2>
-
-      <% if @items.any? %>
-        <ul class="list-disc space-y-2 pl-5">
-          <% @items.each do |item| %>
-            <li>
-              <%= item.name %>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="text-base-content/60">
-          所持品はありません
+    <div class="space-y-8">
+      <article class="rounded-2xl border border-white/10 bg-gradient-to-b from-slate-800/90 to-slate-900/90 px-5 py-7 shadow-2xl shadow-black/30 sm:px-8 sm:py-10">
+        <p class="whitespace-pre-wrap text-base leading-8 text-slate-200 sm:text-lg sm:leading-9">
+          <%= @current_scene.body %>
         </p>
-      <% end %>
-    </section>
-  </div>
+      </article>
 
-  <div class="mt-8">
-    <%= link_to "ゲームブック詳細に戻る",
-                gamebook_path(@play_session.gamebook),
-                class: "btn btn-ghost" %>
+      <section aria-labelledby="choices-heading">
+        <div class="mb-5 flex items-center gap-4">
+          <div class="h-px flex-1 bg-white/10"></div>
+
+          <h2 id="choices-heading" class="text-sm font-bold tracking-[0.18em] text-[#e6e1d7]">
+            どうしますか？
+          </h2>
+
+          <div class="h-px flex-1 bg-white/10"></div>
+        </div>
+
+        <div class="space-y-3">
+          <% @choices.each_with_index do |choice, index| %>
+            <%= button_to advance_play_session_path(@play_session),
+                          method: :patch,
+                          params: { choice_id: choice.id },
+                          form_class: "w-full",
+                          class: "group flex w-full cursor-pointer items-center gap-4 rounded-xl border border-slate-700 bg-slate-900/80 px-5 py-4 text-left text-slate-200 shadow-lg shadow-black/10 transition duration-200 hover:-translate-y-0.5 hover:border-violet-400/70 hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400" do %>
+              <span class="flex size-8 shrink-0 items-center justify-center rounded-full border border-violet-400/40 text-sm font-bold text-violet-300 transition group-hover:border-violet-300 group-hover:bg-violet-400/10">
+                <%= index + 1 %>
+              </span>
+
+              <span class="font-medium leading-6">
+                <%= choice.text %>
+              </span>
+
+              <span class="ml-auto text-violet-300/50 transition group-hover:translate-x-1 group-hover:text-violet-300" aria-hidden="true">
+                →
+              </span>
+            <% end %>
+          <% end %>
+        </div>
+      </section>
+
+      <aside class="rounded-xl border border-white/10 bg-black/20 px-5 py-4">
+        <h2 class="text-xs font-bold tracking-[0.18em] text-slate-400 uppercase">
+          現在の所持品
+        </h2>
+
+        <% if @items.any? %>
+          <ul class="mt-3 flex flex-wrap gap-2">
+            <% @items.each do |item| %>
+              <li class="rounded-full border border-amber-300/20 bg-amber-200/5 px-3 py-1.5 text-sm text-amber-100/80">
+                <%= item.name %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="mt-3 text-sm text-slate-500">
+            所持品はありません
+          </p>
+        <% end %>
+      </aside>
+    </div>
+
+    <div class="mt-10 text-center">
+      <%= link_to "ゲームブック詳細に戻る",
+                  gamebook_path(@play_session.gamebook),
+                  class: "inline-flex items-center rounded-lg px-4 py-2 text-sm text-slate-400 transition hover:bg-white/5 hover:text-slate-200" %>
+    </div>
   </div>
 </div>
