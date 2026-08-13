@@ -14,6 +14,12 @@
     <p class="mt-4 max-w-2xl text-sm leading-7 text-[#9299a5] sm:text-base">
       あなたが作成した物語を確認できます。
     </p>
+
+    <div class="mt-6">
+      <%= link_to "新しく生成する",
+                  new_gamebook_path,
+                  class: "inline-flex items-center justify-center rounded-xl border border-[#6f648e] bg-[#5d5379] px-5 py-3 text-sm font-bold text-white transition hover:border-[#8377a4] hover:bg-[#6d628b]" %>
+    </div>
   </header>
 
   <% if @gamebooks.any? %>

@@ -211,6 +211,45 @@ class GamebooksControllerTest < ActionDispatch::IntegrationTest
     )
   end
 
+  test "ログイン中はゲームブック生成条件入力画面を表示できる" do
+    login_as(@user)
+
+    get new_gamebook_path
+
+    assert_response :success
+    assert_select "h1", text: "ゲームブック生成"
+    assert_select "select[name='gamebook[genre]']"
+    assert_select "textarea[name='gamebook[world_setting]']"
+    assert_select "select[name='gamebook[tone]']"
+    assert_select "select[name='gamebook[difficulty]']"
+    assert_select "select[name='gamebook[play_time]']"
+    assert_select(
+      "input[type='submit'][value='ゲームブックを生成する'][disabled]"
+    )
+    assert_select(
+      "a[href='#{gamebooks_path}']",
+      text: "一覧へ戻る"
+    )
+  end
+
+  test "未ログイン時はゲームブック生成条件入力画面を表示できない" do
+    get new_gamebook_path
+
+    assert_redirected_to login_path
+  end
+
+  test "ゲームブック一覧画面に新しく生成するリンクが表示される" do
+    login_as(@user)
+
+    get gamebooks_path
+
+    assert_response :success
+    assert_select(
+      "a[href='#{new_gamebook_path}']",
+      text: "新しく生成する"
+    )
+  end
+
   private
 
   def login_as(user)

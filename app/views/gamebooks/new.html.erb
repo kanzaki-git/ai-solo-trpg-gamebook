@@ -1,0 +1,169 @@
+<% content_for :title, "ゲームブック生成 | AIソロTRPG型ゲームブック" %>
+
+<div class="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+  <%# ページ見出し %>
+  <header class="border-b border-[#29313e] pb-7">
+    <p class="text-xs font-semibold tracking-[0.2em] text-[#9388b4]">
+      CREATE GAMEBOOK
+    </p>
+
+    <h1 class="mt-3 font-serif text-3xl font-bold tracking-tight text-[#e6e1d7] sm:text-4xl">
+      ゲームブック生成
+    </h1>
+
+    <p class="mt-4 max-w-2xl text-sm leading-7 text-[#9299a5] sm:text-base">
+      あなたが遊びたい物語の条件を選んでください。
+      すべてを細かく決めなくても、AIが内容を補いながらゲームブックを作成します。
+    </p>
+  </header>
+
+    <%# 生成条件入力フォーム %>
+  <%= form_with model: @gamebook, class: "mt-8 space-y-6" do |form| %>
+    <section class="rounded-2xl border border-[#343c4a] bg-[#151b25] px-5 py-6 shadow-xl shadow-black/20 sm:px-7">
+      <div>
+        <%= form.label :genre,
+                       "ジャンル",
+                       class: "block text-sm font-bold text-[#e6e1d7]" %>
+
+        <p class="mt-2 text-sm leading-6 text-[#9299a5]">
+          物語の中心となるジャンルを選んでください。
+        </p>
+
+        <%= form.select :genre,
+                        [
+                          ["ファンタジー", "ファンタジー"],
+                          ["ミステリー", "ミステリー"],
+                          ["ホラー", "ホラー"],
+                          ["SF", "SF"],
+                          ["現代", "現代"],
+                        ],
+                        { prompt: "ジャンルを選択してください" },
+                        {
+                          required: true,
+                          class: "mt-4 block w-full rounded-xl border border-[#424b5a] bg-[#10151d] px-4 py-3 text-sm text-[#e6e1d7] outline-none transition focus:border-[#756a96] focus:ring-2 focus:ring-[#756a96]/30"
+                        } %>
+      </div>
+
+      <div class="mt-6 border-t border-[#29313e] pt-6">
+        <%= form.label :world_setting,
+                       "世界観",
+                       class: "block text-sm font-bold text-[#e6e1d7]" %>
+
+        <p class="mt-2 text-sm leading-6 text-[#9299a5]">
+          舞台となる場所や時代、登場してほしいもの、起きてほしい事件などを自由に入力してください。
+        </p>
+
+        <%= form.text_area :world_setting,
+                           rows: 6,
+                           required: true,
+                           placeholder: "例：深い霧に包まれた港町。町外れには、何年も使われていない古い灯台がある。",
+                           class: "mt-4 block w-full resize-y rounded-xl border border-[#424b5a] bg-[#10151d] px-4 py-3 text-sm leading-7 text-[#e6e1d7] placeholder:text-[#626a76] outline-none transition focus:border-[#756a96] focus:ring-2 focus:ring-[#756a96]/30" %>
+
+        <p class="mt-2 text-xs leading-5 text-[#747c89]">
+          短い文章でも生成できます。決まっていない部分はAIが補います。
+        </p>
+      </div>
+
+      <div class="mt-6 border-t border-[#29313e] pt-6">
+        <%= form.label :tone,
+                       "雰囲気",
+                       class: "block text-sm font-bold text-[#e6e1d7]" %>
+
+        <p class="mt-2 text-sm leading-6 text-[#9299a5]">
+          物語全体の雰囲気を選んでください。
+        </p>
+
+        <%= form.select :tone,
+                        [
+                          ["明るい", "明るい"],
+                          ["シリアス", "シリアス"],
+                          ["ダーク", "ダーク"],
+                          ["コメディ", "コメディ"],
+                          ["不気味", "不気味"],
+                          ["感動的", "感動的"]
+                        ],
+                        { prompt: "雰囲気を選択してください" },
+                        {
+                          required: true,
+                          class: "mt-4 block w-full rounded-xl border border-[#424b5a] bg-[#10151d] px-4 py-3 text-sm text-[#e6e1d7] outline-none transition focus:border-[#756a96] focus:ring-2 focus:ring-[#756a96]/30"
+                        } %>
+      </div>
+
+      <div class="mt-6 border-t border-[#29313e] pt-6">
+        <%= form.label :difficulty,
+                       "難易度",
+                       class: "block text-sm font-bold text-[#e6e1d7]" %>
+
+        <p class="mt-2 text-sm leading-6 text-[#9299a5]">
+          選択肢や条件分岐の難しさを選んでください。
+        </p>
+
+        <%= form.select :difficulty,
+                        [
+                          ["易しい", "易しい"],
+                          ["普通", "普通"],
+                          ["難しい", "難しい"]
+                        ],
+                        { prompt: "難易度を選択してください" },
+                        {
+                          required: true,
+                          class: "mt-4 block w-full rounded-xl border border-[#424b5a] bg-[#10151d] px-4 py-3 text-sm text-[#e6e1d7] outline-none transition focus:border-[#756a96] focus:ring-2 focus:ring-[#756a96]/30"
+                        } %>
+
+        <p class="mt-2 text-xs leading-5 text-[#747c89]">
+          初めて遊ぶ場合は「普通」がおすすめです。
+        </p>
+      </div>
+
+            <div class="mt-6 border-t border-[#29313e] pt-6">
+        <%= form.label :play_time,
+                       "プレイ時間",
+                       class: "block text-sm font-bold text-[#e6e1d7]" %>
+
+        <p class="mt-2 text-sm leading-6 text-[#9299a5]">
+          1回のプレイにかけたい時間を選んでください。
+        </p>
+
+        <%= form.select :play_time,
+                        [
+                          ["約15分", 15],
+                          ["約30分", 30],
+                          ["約45分", 45],
+                          ["約60分", 60]
+                        ],
+                        {
+                          selected: @gamebook.play_time || 30,
+                          include_blank: false
+                        },
+                        {
+                          class: "mt-4 block w-full rounded-xl border border-[#424b5a] bg-[#10151d] px-4 py-3 text-sm text-[#e6e1d7] outline-none transition focus:border-[#756a96] focus:ring-2 focus:ring-[#756a96]/30"
+                        } %>
+
+        <p class="mt-2 text-xs leading-5 text-[#747c89]">
+          基本のプレイ時間として「約30分」が選択されています。
+        </p>
+      </div>
+    </section>
+
+    <%# フォーム操作 %>
+    <div class="rounded-2xl border border-[#343c4a] bg-[#151b25] px-5 py-6 sm:px-7">
+      <p class="text-sm leading-6 text-[#9299a5]">
+        入力した条件をもとに、AIがゲームブックを生成します。
+      </p>
+
+      <div class="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <%= link_to "一覧へ戻る",
+                    gamebooks_path,
+                    class: "inline-flex items-center justify-center rounded-xl border border-[#4a5363] bg-[#202735] px-5 py-3 text-sm font-bold text-[#e6e1d7] transition hover:border-[#606b7d] hover:bg-[#293241]" %>
+
+        <%= form.submit "ゲームブックを生成する",
+                        disabled: true,
+                        class: "inline-flex cursor-not-allowed items-center justify-center rounded-xl border border-[#4b465d] bg-[#292536] px-5 py-3 text-sm font-bold text-[#777080] opacity-70" %>
+      </div>
+
+      <p class="mt-3 text-right text-xs leading-5 text-[#747c89]">
+        AIによる生成処理は、後続のIssueで実装します。
+      </p>
+    </div>
+  <% end %>
+</div>
