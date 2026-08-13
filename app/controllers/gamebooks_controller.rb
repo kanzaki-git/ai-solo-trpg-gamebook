@@ -5,6 +5,10 @@ class GamebooksController < ApplicationController
     @gamebooks = current_user.gamebooks.order(created_at: :desc)
   end
 
+  def new
+    @gamebook = current_user.gamebooks.build
+  end
+
   def show
     @gamebook = current_user.gamebooks.find(params[:id])
     @playing_session = current_user.play_sessions
